@@ -1,0 +1,17 @@
+[package]
+name = "bevy-aqua-bsn-pie"
+version = "0.1.2"
+edition = "2024"
+rust-version = "1.95"
+authors = ["bevy-aqua contributors"]
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+bevy.workspace = true
+bevy-aqua.workspace = true
+bevy-aqua-bsn.workspace = true
+bsn_runtime.workspace = true
+
+[lints]
+workspace = true

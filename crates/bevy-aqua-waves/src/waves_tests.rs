@@ -43,13 +43,39 @@ fn displacement_bounds_follow_active_wave_source() {
         assert_eq!(bound.horizontal, FFT_CHOP * bound.vertical);
     }
 
-    let moderate_startup_bounds = displacement_bounds(&settings, &layout, 1.0);
-    settings.sea_state = bevy_aqua_core::SeaState::Calm;
-    assert_eq!(
-        displacement_bounds(&settings, &layout, 1.0),
-        moderate_startup_bounds,
-        "FFT bounds must follow the startup amplitude, not live sea state",
+    let moderate_bounds = displacement_bounds(
+        &settings,
+        &layout,
+        settings.sea_state.amplitude_multiplier(),
     );
+    settings.sea_state = bevy_aqua_core::SeaState::Calm;
+    let calm_bounds = displacement_bounds(
+        &settings,
+        &layout,
+        settings.sea_state.amplitude_multiplier(),
+    );
+    for (calm, moderate) in calm_bounds.into_iter().zip(moderate_bounds) {
+        assert!((calm.vertical / moderate.vertical - 0.5).abs() < 1e-5);
+    }
+}
+
+#[test]
+fn spectrum_config_tracks_only_rebuild_inputs() {
+    let base = OceanWaves::default();
+    let key = SpectrumConfig::from(&base);
+
+    let mut per_frame = base;
+    per_frame.flow = Vec2::new(3.0, -2.0);
+    per_frame.shallow_water_attenuation = 0.25;
+    per_frame.model = WaveModel::Spectral;
+    assert_eq!(SpectrumConfig::from(&per_frame), key);
+
+    let mut rebuilt = base;
+    rebuilt.wind_direction_degrees = 35.0;
+    assert_ne!(SpectrumConfig::from(&rebuilt), key);
+    rebuilt = base;
+    rebuilt.sea_state = bevy_aqua_core::SeaState::Rough;
+    assert_ne!(SpectrumConfig::from(&rebuilt), key);
 }
 
 #[test]

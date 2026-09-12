@@ -1,0 +1,28 @@
+[package]
+name = "bevy-aqua-bsn-extension"
+description = "Directory-installable ABI-v7 Aqua extension for BSN Editor"
+version = "0.1.2"
+edition = "2024"
+rust-version = "1.95"
+authors = ["bevy-aqua contributors"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sayhisam1/bevy-aqua"
+publish = false
+
+[package.metadata.bsn]
+id = "bevy_aqua.editor"
+label = "Aqua Water"
+publisher = "bevy-aqua"
+activation = "startup_required"
+# Increment only when bootstrap or a type/asset consumed by bootstrap changes.
+bootstrap_compatibility = 3
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+bevy-aqua-bsn-editor.workspace = true
+bsn_extension.workspace = true
+
+[lints]
+workspace = true

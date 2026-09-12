@@ -1,8 +1,14 @@
 target/
 Cargo.lock
+!integrations/bsn-editor/Cargo.lock
 .cargo
+!integrations/bsn-editor/.cargo/
+!integrations/bsn-editor/.cargo/config.toml
 assets/test/
 rustc-ice-*.txt
+artifacts/bsn-extension/
+**/.bsn_editor/
 
 # internal working notes, never published
 refs/
+/.bsn_editor

@@ -1,0 +1,12 @@
+[net]
+# bsn-sdk is a private Git dependency. Use the user's normal Git credential
+# helper instead of Cargo's embedded libgit2 transport.
+git-fetch-with-cli = true
+
+[build]
+# ABI-v7 extensions and their host must agree on a stable artifact closure.
+incremental = false
+
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]

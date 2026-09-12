@@ -12,7 +12,8 @@
 //! for depth-aware transmission.
 //!
 //! Insert [`OceanWaves`] and [`AquaSettings`] before [`AquaPlugin`] to replace
-//! their defaults. [`OceanWaves::sea_state`] is startup-only.
+//! their defaults. Spectrum-shaping wave settings can also be changed at
+//! runtime; Aqua rebuilds the deterministic spectrum when they change.
 //!
 //! Insert a [`BedHeightMap`] built from the terrain heightfield for wave
 //! attenuation and shoreline foam. Without one, water uses the deep default.
@@ -25,7 +26,8 @@
 //! The supported application-facing contract is this crate's documented root:
 //!
 //! - setup and global configuration: [`AquaPlugin`], [`Ocean`], [`OceanWaves`],
-//!   [`AquaSettings`], [`BedHeightMap`], and [`AquaDebug`];
+//!   [`AquaSettings`], [`BedHeightMap`], [`AquaDebug`], and
+//!   [`AquaPrimaryView`];
 //! - bounded-water authoring: [`WaterBody`], [`WaterShape`], [`WaterOptics`],
 //!   [`RiverPath`], [`RiverPoint`], and Bevy [`Transform`];
 //! - water and rendering choices: [`SeaState`], [`WaveModel`],
@@ -62,6 +64,19 @@ pub use bevy_aqua_query::{WaveQuery, WaveSurface};
 pub use bevy_aqua_reflect::ReflectedInWater;
 #[cfg(feature = "spray")]
 pub use bevy_aqua_spray::{SprayQuality, SpraySettings};
+
+/// Selects the active 3D camera that drives Aqua's camera-centred cascades.
+///
+/// Aqua supports one primary water view. When one or more active cameras carry
+/// this marker, the highest-order marked camera wins, with the lowest entity
+/// id breaking ties deterministically. Without a marked camera, Aqua applies
+/// the same ordering rule to every active non-auxiliary `Camera3d`.
+///
+/// Editor and split-screen integrations should move this marker to the view
+/// whose water presentation must be authoritative for the current frame.
+#[derive(Component, Debug, Default, Clone, Copy)]
+pub struct AquaPrimaryView;
+
 /// Adds the ocean renderer and its simulation plugins.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct AquaPlugin;
@@ -130,6 +145,7 @@ type OceanCameraQuery<'w, 's> = Query<
         &'static bevy::camera::Camera,
         &'static bevy::camera::Projection,
         Option<&'static OceanView>,
+        Has<AquaPrimaryView>,
     ),
     (
         With<bevy::camera::Camera3d>,
@@ -150,8 +166,16 @@ fn update_view(
         ResMut<ViewOrder>,
     ),
 ) {
-    let Some((entity, camera, projection, marker)) =
-        cameras.iter().find(|(_, camera, _, _)| camera.is_active)
+    let Some((entity, camera, projection, marker, _)) = cameras
+        .iter()
+        .filter(|(_, camera, _, _, _)| camera.is_active)
+        .max_by(|left, right| {
+            left.4
+                .cmp(&right.4)
+                .then_with(|| left.1.order.cmp(&right.1.order))
+                // Prefer the lower entity id when semantic priorities tie.
+                .then_with(|| right.0.to_bits().cmp(&left.0.to_bits()))
+        })
     else {
         return;
     };

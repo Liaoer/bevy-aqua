@@ -1,0 +1,6 @@
+package = "bevy-aqua-bsn-pie"
+plugin = "GamePlugin"
+scene_source = "active"
+
+[[run]]
+name = "Play"

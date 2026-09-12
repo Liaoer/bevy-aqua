@@ -1,0 +1,14 @@
+#"Aqua Scene"
+bevy_transform::components::transform::Transform
+bevy_camera::visibility::Visibility::Inherited
+bevy_ecs::hierarchy::Children [
+    #"Aqua Ocean"
+    bevy_aqua_bsn::AquaOceanSettings
+    bevy_transform::components::transform::Transform
+    bevy_camera::visibility::Visibility::Inherited,
+
+    #"Aqua Lake"
+    bevy_aqua_bsn::AquaWaterBodySettings
+    bevy_transform::components::transform::Transform
+    bevy_camera::visibility::Visibility::Inherited,
+]

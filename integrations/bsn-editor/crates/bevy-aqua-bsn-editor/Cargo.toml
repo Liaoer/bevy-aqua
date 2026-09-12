@@ -1,0 +1,19 @@
+[package]
+name = "bevy-aqua-bsn-editor"
+description = "ABI-v7 BSN Editor facade for bevy-aqua"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+bevy.workspace = true
+bevy-aqua.workspace = true
+bevy-aqua-bsn.workspace = true
+bevy_enhanced_input.workspace = true
+bsn_extension.workspace = true
+
+[lints]
+workspace = true

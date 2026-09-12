@@ -236,7 +236,8 @@ fn init_pipeline(
 }
 
 fn prepare_bind_groups(
-    frame: Res<Frame>,
+    // An editor can render before the first main-world extraction.
+    frame: If<Res<Frame>>,
     world_slot: ResMut<AnimWavesUniformSlot>,
     bed: Option<Res<bed::BedHeightMap>>,
     fallback: Res<bed::GpuFallback>,
@@ -388,6 +389,17 @@ fn prepare_bind_groups(
         SURFACE,
         &BindGroupEntries::sequential((&output.texture_view, &surface.texture_view, fft_uniform))
     );
+}
+
+#[cfg(test)]
+#[test]
+fn prepare_before_first_extraction_is_skipped() {
+    let mut app = App::new();
+    app.add_systems(Update, prepare_bind_groups);
+    // The editor may render more than once before main-world startup/extraction.
+    // The default error handler panics for missing required resources.
+    app.update();
+    app.update();
 }
 
 fn cascade_grid(layers: u32) -> [u32; 3] {

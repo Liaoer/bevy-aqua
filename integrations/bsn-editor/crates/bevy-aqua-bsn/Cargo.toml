@@ -1,0 +1,15 @@
+[package]
+name = "bevy-aqua-bsn"
+description = "Reflected BSN scene-authoring facade for bevy-aqua"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+bevy.workspace = true
+bevy-aqua.workspace = true
+
+[lints]
+workspace = true

@@ -3,6 +3,14 @@ use super::*;
 use bevy_aqua_sdf::{RiverPath, RiverPoint};
 
 #[test]
+fn prepare_before_first_extraction_is_skipped() {
+    let mut app = App::new();
+    app.add_systems(Update, prepare_bind_groups);
+    app.update();
+    app.update();
+}
+
+#[test]
 fn probes_ride_transformed_river_flow_and_body_levels() {
     let pond = bevy_aqua_core::WaterShape::Circle { radius: 19.0 };
     let river = bevy_aqua_core::WaterShape::River {

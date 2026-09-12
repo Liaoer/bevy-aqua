@@ -1,0 +1,14 @@
+#"Aqua Lake Scene"
+bevy_transform::components::transform::Transform
+bevy_camera::visibility::Visibility::Inherited
+bevy_ecs::hierarchy::Children [
+    #"Aqua Lake"
+    bevy_aqua_bsn::AquaWaterBodySettings
+    bevy_transform::components::transform::Transform
+    bevy_camera::visibility::Visibility::Inherited,
+    #"Sun"
+    bevy_light::directional_light::DirectionalLight { illuminance: 18000.0 }
+    bevy_transform::components::transform::Transform {
+        rotation: glam::Quat { x: -0.3816559, y: 0.18298657, z: -0.07736548, w: 0.9027011 },
+    }
+]

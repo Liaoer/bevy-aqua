@@ -99,7 +99,8 @@ fn init_pipeline(
 }
 
 fn prepare_bind_groups(
-    frame: Res<Frame>,
+    // An editor can render before the first main-world extraction.
+    frame: If<Res<Frame>>,
     bed: Option<Res<bed::BedHeightMap>>,
     fallback: Res<bed::GpuFallback>,
     images: Res<RenderAssets<GpuImage>>,
@@ -160,6 +161,15 @@ fn prepare_bind_groups(
     }
     direction!("a_to_b", "Aqua foam A to B", state_b, state_a);
     direction!("b_to_a", "Aqua foam B to A", state_a, state_b);
+}
+
+#[cfg(test)]
+#[test]
+fn prepare_before_first_extraction_is_skipped() {
+    let mut app = App::new();
+    app.add_systems(Update, prepare_bind_groups);
+    app.update();
+    app.update();
 }
 
 fn write_foam(

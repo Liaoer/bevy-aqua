@@ -1,0 +1,49 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "examples/aqua-pie"]
+
+[workspace.package]
+version = "0.1.2"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sayhisam1/bevy-aqua"
+
+[patch.crates-io]
+bevy_text = { path = "../../../bsn-editor/crates/bevy_text_bsn" }
+parley = { path = "../../../bsn-editor/third_party/parley-0.9.0" }
+
+[workspace.dependencies]
+bevy = { version = "=0.19.1", features = [
+    "bevy_feathers",
+    "bevy_scene",
+    "serialize",
+    "debug",
+    "bevy_remote",
+    "file_watcher",
+    "bevy_dev_tools",
+    "bevy_world_serialization",
+    "reflect_documentation",
+    "dds",
+    "pbr_light_textures",
+] }
+bevy-aqua = { path = "../.." }
+bevy-aqua-bsn = { path = "crates/bevy-aqua-bsn" }
+bevy-aqua-bsn-editor = { path = "crates/bevy-aqua-bsn-editor" }
+bevy_enhanced_input = "0.26"
+bsn_extension = { path = "../../../bsn-editor/crates/bsn_extension" }
+bsn_runtime = { path = "../../../bsn-editor/crates/bsn_runtime" }
+
+[workspace.lints.rust]
+ambiguous_negative_literals = "warn"
+missing_debug_implementations = "warn"
+redundant_imports = "warn"
+redundant_lifetimes = "warn"
+trivial_numeric_casts = "warn"
+unsafe_op_in_unsafe_fn = "warn"
+unused_lifetimes = "warn"
+
+[workspace.lints.clippy]
+doc_markdown = "warn"
+type_complexity = "allow"
+too_many_arguments = "allow"

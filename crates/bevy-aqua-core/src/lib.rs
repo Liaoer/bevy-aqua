@@ -249,29 +249,28 @@ impl std::fmt::Display for SeaState {
 /// Configures ocean displacement and wave synthesis.
 ///
 /// Insert this resource before adding the Aqua plugins to replace its
-/// defaults. The `model` and `shallow_water_attenuation` fields can change at
-/// runtime. `sea_state` is sampled during startup because it determines
-/// generated spectrum assets.
-#[derive(Resource, Debug, Clone, Copy)]
+/// defaults. Every field can change at runtime. Changes to spectrum-shaping
+/// fields rebuild the deterministic analytic and FFT authoring data; current
+/// and attenuation changes remain lightweight per-frame uniform updates.
+#[derive(Resource, Debug, Clone, Copy, PartialEq)]
 pub struct OceanWaves {
     pub model: WaveModel,
-    /// Startup-only displacement-energy preset.
+    /// Displacement-energy preset. Changing it rebuilds the wave spectrum.
     pub sea_state: SeaState,
     /// Strength of depth-driven shallow-water shoaling, clamped to `0..=1`.
     pub shallow_water_attenuation: f32,
     /// Wind direction in degrees, measured clockwise from world +X when seen
     /// from above. Both models align their spectra along this axis and
     /// spread components across the accepted directional variance around it.
-    /// Startup-only: changing it after startup restarts nothing, so set it
-    /// before the plugins run (like `sea_state`).
+    /// Changing it rebuilds both analytic components and the FFT spectrum.
     pub wind_direction_degrees: f32,
     /// Spectral-model wind speed in metres per second, reshaping JONSWAP's
-    /// peak frequency. Startup-only; the analytic model scales Crest's
-    /// accepted amplitude curve via `sea_state` instead. Default reproduces
-    /// the shipped spectrum (20 m/s).
+    /// peak frequency. The analytic model ignores this field. Default
+    /// reproduces the shipped spectrum (20 m/s).
     pub wind_speed: f32,
-    /// Spectral-model fetch in metres (JONSWAP dimensionless fetch). Startup
-    /// only. Default reproduces the shipped spectrum (100 km).
+    /// Spectral-model fetch in metres (JONSWAP dimensionless fetch). Changing
+    /// it rebuilds the FFT spectrum. Default reproduces the shipped spectrum
+    /// (100 km).
     pub fetch: f32,
     /// World-space current in metres per second. Wave content advects at this
     /// velocity (a sampling-space `x - flow * t` shift, which is exact Doppler

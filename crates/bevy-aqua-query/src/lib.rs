@@ -414,7 +414,8 @@ fn init_pipeline(
 }
 
 fn prepare_bind_groups(
-    resources: (Res<Data>, Res<AnimWavesUniformSlot>, Option<Res<Buffers>>),
+    // Cascade data is unavailable until the first main-world extraction.
+    resources: (If<Res<Data>>, Res<AnimWavesUniformSlot>, Option<Res<Buffers>>),
     assets: (
         Res<RenderAssets<GpuImage>>,
         Res<RenderAssets<GpuShaderBuffer>>,

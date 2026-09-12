@@ -1,0 +1,18 @@
+# bsn_editor project settings.
+
+# The workspace package that exposes the game plugin.
+manifest_path = "integrations/bsn-editor/examples/aqua-pie/Cargo.toml"
+package = "bevy-aqua-bsn-pie"
+scene_source = "active"
+
+# The game plugin type inside your lib crate.
+plugin = "GamePlugin"
+
+[android]
+application_id = "com.example.bevy_aqua"
+app_name = "Bevy Aqua"
+version_code = 1
+version_name = "0.1.2"
+
+[[run]]
+name = "Play"

@@ -120,11 +120,31 @@ pub struct DisplacementBounds {
     pub vertical: f32,
 }
 
-/// The startup sea-state amplitude multiplier; render bounds depend on it
-/// until settings change the model.
+/// The active sea-state amplitude multiplier used by render bounds.
 #[doc(hidden)]
 #[derive(Resource, Clone, Copy, Debug)]
 pub struct StartupAmplitude(pub f32);
+
+/// Spectrum-shaping settings already materialized into [`Frame`].
+#[doc(hidden)]
+#[derive(Resource, Clone, Copy, Debug, PartialEq)]
+pub struct SpectrumConfig {
+    sea_state: bevy_aqua_core::SeaState,
+    wind_direction_degrees: f32,
+    wind_speed: f32,
+    fetch: f32,
+}
+
+impl From<&OceanWaves> for SpectrumConfig {
+    fn from(settings: &OceanWaves) -> Self {
+        Self {
+            sea_state: settings.sea_state,
+            wind_direction_degrees: settings.wind_direction_degrees,
+            wind_speed: settings.wind_speed,
+            fetch: settings.fetch,
+        }
+    }
+}
 
 /// Returns cumulative displacement bounds for each cascade.
 ///
@@ -218,6 +238,7 @@ pub fn init(
     settings: Res<OceanWaves>,
     mut images: ResMut<Assets<Image>>,
 ) {
+    commands.insert_resource(SpectrumConfig::from(settings.as_ref()));
     let authoring = fft::SpectrumAuthoring {
         wind_radians: settings.wind_direction_degrees.to_radians(),
         wind_speed: settings.wind_speed,
@@ -266,8 +287,16 @@ pub fn update(
     data: Res<lod::Data>,
     settings: Res<OceanWaves>,
     bed: Option<Res<BedHeightMap>>,
+    mut images: ResMut<Assets<Image>>,
+    mut spectrum: ResMut<SpectrumConfig>,
+    mut amplitude: ResMut<StartupAmplitude>,
     mut frame: ResMut<Frame>,
 ) {
+    let next_spectrum = SpectrumConfig::from(settings.as_ref());
+    if *spectrum != next_spectrum {
+        rebuild_spectrum(&data, &settings, &mut images, &mut frame, &mut amplitude);
+        *spectrum = next_spectrum;
+    }
     frame.uniform.layout = data.layout().clone();
     frame.uniform.time.x = time.elapsed_secs();
     frame.uniform.flow = Vec4::new(settings.flow.x, settings.flow.y, 0.0, 0.0);
@@ -280,6 +309,33 @@ pub fn update(
     frame.fft_uniform.mode.x = frame.fft_bins as f32;
     frame.model = settings.model;
     frame.fft_bins = fft::active_bin_count(settings.shallow_water_attenuation, bed.is_none());
+}
+
+fn rebuild_spectrum(
+    data: &lod::Data,
+    settings: &OceanWaves,
+    images: &mut Assets<Image>,
+    frame: &mut Frame,
+    amplitude: &mut StartupAmplitude,
+) {
+    let multiplier = settings.sea_state.amplitude_multiplier();
+    let authoring = fft::SpectrumAuthoring {
+        wind_radians: settings.wind_direction_degrees.to_radians(),
+        wind_speed: settings.wind_speed,
+        fetch: settings.fetch,
+    };
+    let h0 = fft::make_h0(data.layout(), multiplier, &authoring);
+    if let Some(mut existing) = images.get_mut(&frame.h0[0]) {
+        *existing = h0;
+    } else {
+        frame.h0[0] = images.add(h0);
+    }
+    frame.uniform = make_uniform(
+        data.layout().clone(),
+        multiplier,
+        settings.wind_direction_degrees.to_radians(),
+    );
+    amplitude.0 = multiplier;
 }
 
 /// Per-frame wave simulation resources: textures, uniforms, model gates.
