@@ -12,3 +12,4 @@ artifacts/bsn-extension/
 # internal working notes, never published
 refs/
 /.bsn_editor
+/.jsn/project.jsn
